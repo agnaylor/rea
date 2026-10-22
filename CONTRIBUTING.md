@@ -239,6 +239,26 @@ MinGW-w64, and `tar`; the build script does not run on Windows. See that guide
 for the build and artifact-verification commands and the separate real Windows
 verification prerequisites. Keep the generated addon and manifest uncommitted.
 
+Without those two files, `npm run build:cached` itself refuses to start on
+Windows, because the build lock (`run-exclusive`) will not run a command whose
+descendants it cannot own. When the checkout's `package.json` version matches a
+published release, restore the files from that release's official npm tarball
+instead of building them. Verify the tarball digest against the registry before
+extracting:
+
+```bash
+npm view rea-agents@<version> dist.integrity
+npm pack rea-agents@<version>
+openssl dgst -sha512 -binary rea-agents-<version>.tgz | openssl base64 -A
+tar --force-local -xzf rea-agents-<version>.tgz package/native/windows/build/manifest.json package/native/windows/build/rea-windows-x64.node
+mkdir -p native/windows/build && cp package/native/windows/build/* native/windows/build/
+```
+
+The two digests must be identical. The loader then checks the manifest's
+version, ABI, architecture, and artifact SHA-256 before granting authority. A
+checkout whose version differs from every published release still needs the
+Linux build lane.
+
 ## Documentation website
 
 The VitePress site uses the Markdown files in `docs/`. Run `npm run docs:dev`

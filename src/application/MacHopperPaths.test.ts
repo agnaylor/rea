@@ -46,9 +46,12 @@ describe("macOS Hopper launcher paths", () => {
     const appDirectory = join(temporary, "Applications", "Hopper Preview.app");
     try {
       await mkdir(appDirectory, { recursive: true });
-      expect([...macHopperLauncherCandidates(temporary)]).toContain(
-        join(appDirectory, "Contents/MacOS/hopper"),
-      );
+      // macOS launcher paths are always POSIX-joined; normalize the host's
+      // temporary path so this scan check also holds on a Windows runner.
+      const posixForm = (path: string): string => path.replaceAll("\\", "/");
+      expect(
+        [...macHopperLauncherCandidates(temporary)].map(posixForm),
+      ).toContain(posixForm(join(appDirectory, "Contents/MacOS/hopper")));
     } finally {
       await rm(temporary, { recursive: true, force: true });
     }
