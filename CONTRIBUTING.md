@@ -259,6 +259,14 @@ version, ABI, architecture, and artifact SHA-256 before granting authority. A
 checkout whose version differs from every published release still needs the
 Linux build lane.
 
+The general source suite (`npm run test:fast`, `npm run test:changed`, and
+`npm run test:local`) runs on Linux in CI, and Windows CI runs a curated lane.
+On a Windows checkout, some source tests fail because fixtures use POSIX paths,
+`#!/bin/sh` tool stubs, or POSIX rename semantics. Compare failures against the
+base revision, or run the suite on Linux or WSL, before attributing them to a
+change. See [testing](docs/testing.md#developer-commands) for command scopes
+and lane selection.
+
 ## Documentation website
 
 The VitePress site uses the Markdown files in `docs/`. Run `npm run docs:dev`
